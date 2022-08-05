@@ -112,4 +112,94 @@ PM2 is used very similarly to nodemon or node to start a process. The sytax is a
 $ pm2 start index.js 
 ```
 
-## Install
+## Install Certbot (SSL Certificate Configurator)
+
+```sh
+# Make sure snapd is up to date
+$ sudo snap install core; sudo snap refresh core
+
+# Install Certbot
+$ sudo snap install --classic certbot
+
+# Prepare the Certbot command
+$ sudo ln -s /snap/bin/certbot /usr/bin/certbot
+
+# Create SSL Certificate (have domain in hand)
+sudo certbot certonly --standalone
+
+# Auto Renew SSL Certificate
+$ sudo certbot renew --dry-run
+```
+
+## Install and configure nginx
+
+```sh
+# Install nginx
+$ sudo apt-get install nginx
+
+# Delete everything inside /etx/nginx/sites-enabled/default
+$ sudo vim /etc/nginx/sites-enabled/default
+
+# Paste the following:
+server {
+    server_name *change to your domain*;
+    listen 80 default_server;
+    listen [::]:80 default_server ipv6only=on; 
+
+     # Enable HTTP/2
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name *Change to your domain*;
+    # Use letsencrypt certificate
+    ssl_certificate /etc/letsencrypt/live/*Change to your domain*/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/*Change to your domain*/privkey.pem;
+    include snippets/ssl-params.conf;
+    location / {
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-NginX-Proxy true;
+        proxy_pass http://localhost:3000/;
+        proxy_ssl_session_reuse off;
+        proxy_set_header Host $http_host;
+        proxy_cache_bypass $http_upgrade;
+        proxy_redirect off;
+    }
+}
+
+```
+
+## Create a secure Diffie-Hellman Group (Makes SSL Even Safer)
+```sh
+$ sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048
+
+# Create a configuration file for SSL
+$ sudo vim /etc/nginx/snippets/ssl-params.conf
+
+# Paste the following inside the file:
+
+# See https://cipherli.st/ for details on this configuration
+ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+ssl_prefer_server_ciphers on;
+ssl_ciphers "EECDH+AESGCM:EDH+AESGCM:AES256+EECDH:AES256+EDH";
+ssl_ecdh_curve secp384r1; # Requires nginx >= 1.1.0
+ssl_session_cache shared:SSL:10m;
+ssl_session_tickets off; # Requires nginx >= 1.5.9
+ssl_stapling on; # Requires nginx >= 1.3.7
+ssl_stapling_verify on; # Requires nginx => 1.3.7
+resolver 8.8.8.8 8.8.4.4 valid=300s;
+resolver_timeout 5s;
+add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload";
+add_header X-Frame-Options DENY;
+add_header X-Content-Type-Options nosniff;
+
+# Add our strong Diffie-Hellman group
+ssl_dhparam /etc/ssl/certs/dhparam.pem;
+```
+
+## Test the nginx configuration
+```sh
+$ sudo nginx -t
+
+# If the output of the command above is successful:
+$ sudo systemctl start nginx
+```
