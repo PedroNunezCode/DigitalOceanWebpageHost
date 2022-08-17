@@ -114,6 +114,8 @@ $ pm2 start index.js
 
 ## Install Certbot (SSL Certificate Configurator)
 
+You must add the following record to your dns: CAA Authorization letsencrypt.org
+
 ```sh
 # Make sure snapd is up to date
 $ sudo snap install core; sudo snap refresh core
