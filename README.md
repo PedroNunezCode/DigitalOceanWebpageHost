@@ -35,10 +35,10 @@ This also means that any changes you want to make, you'll have to do them from D
 $ ssh root@1.1.1.1
 
 # Create a user to avoid using the root user. (Which has unrestricted sudo rights):
-$ adduser pedronunezcode
+$ adduser custom_user
 
 # Add that new user to the 'sudo' group.
-$ usermod -aG sudo pedronunezcode
+$ usermod -aG sudo custom_user
 
 # Switch to new user and add SSH key to the new user. Since the ability to sign into root will be disabled later.
 $ su - custom_user
