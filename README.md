@@ -126,6 +126,8 @@ $ sudo snap install --classic certbot
 # Prepare the Certbot command
 $ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 
+# Make sure to point A records on domain to IP address of droplet
+
 # Create SSL Certificate (have domain in hand)
 sudo certbot certonly --standalone
 
