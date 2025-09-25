@@ -88,8 +88,8 @@ use for web development will be similar.
 # Install git to clone repository. (I don't develop from the webserver)
 $ sudo apt-get install git
 
-# Instruct apt-get which version of Node.js to download. (I use the current v16 stable build)
-$ curl -sL https://deb.nodesource.com/setup_21.x | sudo -E bash -
+# Instruct apt-get which version of Node.js to download. (I use the current v22 stable build)
+$ curl -sL https://deb.nodesource.com/setup_22.x | sudo -E bash -
 
 # Install the version you asked apt-get to install:
 $ sudo apt-get install nodejs
